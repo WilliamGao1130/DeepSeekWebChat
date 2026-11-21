@@ -5,6 +5,11 @@ declare module '*.module.css' {
 
 declare module '*.css' {}
 
+declare module '*.svg' {
+  const content: string
+  export default content
+}
+
 /** 公开 API 的地址，见 rspack.config.ts 的 createConfig */
 declare const __API_ORIGIN__: string
 
