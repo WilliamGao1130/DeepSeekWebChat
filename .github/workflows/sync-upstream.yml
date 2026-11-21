@@ -1,0 +1,48 @@
+name: Sync upstream
+
+on:
+  schedule:
+    # GitHub cron uses UTC; 16:00 UTC is 00:00 in Asia/Shanghai.
+    - cron: '0 16 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-upstream
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Merge official upstream
+        env:
+          GIT_TERMINAL_PROMPT: '0'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git remote add upstream https://github.com/deepseek-ai/chat-demo.git
+          git fetch --prune upstream main
+
+          if git merge-base --is-ancestor upstream/main HEAD; then
+            echo "Upstream changes are already included."
+            exit 0
+          fi
+
+          if ! git merge --no-edit upstream/main; then
+            echo "Upstream merge has conflicts:"
+            git diff --name-only --diff-filter=U
+            git merge --abort
+            exit 1
+          fi
+
+          git push origin HEAD:main

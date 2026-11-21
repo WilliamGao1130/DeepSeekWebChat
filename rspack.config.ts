@@ -82,7 +82,20 @@ export const createConfig = ({
     }),
     new rspack.DefinePlugin({ __API_ORIGIN__: JSON.stringify(apiOrigin) }),
     new rspack.CopyRspackPlugin({
-      patterns: [{ from: path.resolve(root, 'LICENSE'), to: 'LICENSE', toType: 'file' }],
+      patterns: [
+        { from: path.resolve(root, 'LICENSE'), to: 'LICENSE', toType: 'file' },
+        { from: path.resolve(root, 'public/favicon.svg'), to: 'favicon.svg', toType: 'file' },
+        {
+          from: path.resolve(root, 'public/favicon-32x32.png'),
+          to: 'favicon-32x32.png',
+          toType: 'file',
+        },
+        {
+          from: path.resolve(root, 'public/apple-touch-icon.png'),
+          to: 'apple-touch-icon.png',
+          toType: 'file',
+        },
+      ],
     }),
   ],
   performance: { hints: false },
