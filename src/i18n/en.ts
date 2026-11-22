@@ -12,6 +12,7 @@ export const en = {
   historySearchListAriaLabel: 'Chat history search results',
   historySearchEmptyHint: 'Search your local chat history',
   historySearching: 'Searching...',
+  historySearchLoadEarlier: 'Search earlier chats...',
   historySearchFailed: 'Search failed. Please try again.',
   historySearchNoResult: 'No relevant results',
   historySearchUser: 'You',

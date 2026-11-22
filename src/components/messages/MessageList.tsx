@@ -88,6 +88,11 @@ export const MessageList = ({
   useLayoutEffect(() => {
     const anchor = restoreScrollRef.current
     const scroll = scrollRef.current
+    if (searchTarget?.sessionId === session.id && searchTarget.messageId) {
+      restoreScrollRef.current = null
+      stickyRef.current = false
+      return
+    }
     if (anchor && scroll) {
       const switcher = scroll.querySelector<HTMLElement>(
         `[data-message-version="${CSS.escape(anchor.messageId)}"]`
@@ -100,6 +105,8 @@ export const MessageList = ({
     }
     stickyRef.current = true
     scrollToBottom()
+    // 只在会话切换时决定是否滚到底部；搜索目标由下方 effect 单独定位，避免清除目标时再次跳到底部。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session.id, lastMessageId, scrollToBottom])
 
   useEffect(closeSearchPanel, [session.id, lastMessageId])
@@ -113,24 +120,39 @@ export const MessageList = ({
     if (!searchTarget.messageId) {
       return
     }
+    const targetMessageId = searchTarget.messageId
     stickyRef.current = false
-    requestAnimationFrame(() => {
-      const element =
-        scrollRef.current?.querySelector<HTMLElement>(
-          `[data-message-id="${CSS.escape(searchTarget.messageId ?? '')}"]`
-        ) ?? null
-      if (!element) {
-        return
-      }
-      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      element.scrollIntoView({
-        block: 'center',
-        behavior: reduceMotion ? 'auto' : 'smooth',
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        const scroll = scrollRef.current
+        const element =
+          scroll?.querySelector<HTMLElement>(
+            `[data-message-id="${CSS.escape(targetMessageId)}"]`
+          ) ?? null
+        if (!scroll || !element) {
+          stickyRef.current = true
+          scrollToBottom()
+          return
+        }
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        const elementOffset =
+          element.getBoundingClientRect().top -
+          scroll.getBoundingClientRect().top +
+          scroll.scrollTop
+        const targetTop = Math.max(
+          0,
+          elementOffset - (scroll.clientHeight - element.getBoundingClientRect().height) / 2
+        )
+        scroll.scrollTo({
+          top: targetTop,
+          behavior: reduceMotion ? 'auto' : 'smooth',
+        })
+        scrollTopRef.current = targetTop
+        element.classList.add(styles.searchTarget)
+        window.setTimeout(() => element.classList.remove(styles.searchTarget), 1800)
       })
-      element.classList.add(styles.searchTarget)
-      window.setTimeout(() => element.classList.remove(styles.searchTarget), 1800)
-    })
-  }, [clearSearchTarget, searchTarget, session.id])
+    )
+  }, [clearSearchTarget, scrollToBottom, searchTarget, session.id])
 
   const selectVersion = useCallback(
     (messageId: string, anchorTop: number) => {

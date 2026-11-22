@@ -7,6 +7,8 @@ declare const styles: {
   readonly results: string
   readonly state: string
   readonly spinner: string
+  readonly progress: string
+  readonly loadMore: string
   readonly result: string
   readonly active: string
   readonly resultTop: string

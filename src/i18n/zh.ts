@@ -10,6 +10,7 @@ export const zh = {
   historySearchListAriaLabel: '聊天记录搜索结果',
   historySearchEmptyHint: '输入关键词，搜索本地聊天记录',
   historySearching: '搜索中...',
+  historySearchLoadEarlier: '继续搜索更早记录...',
   historySearchFailed: '搜索失败，请重试',
   historySearchNoResult: '暂无相关结果',
   historySearchUser: '你',

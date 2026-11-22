@@ -95,6 +95,20 @@
   animation: spin 0.8s linear infinite;
 }
 
+.progress,
+.loadMore {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 12px;
+  color: var(--dsw-alias-label-caption);
+  font-size: 12px;
+  line-height: 18px;
+  text-align: center;
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
