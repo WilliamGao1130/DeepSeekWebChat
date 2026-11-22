@@ -8,6 +8,7 @@ import {
 import { selectMessageVersion } from '../../services/chat/store.js'
 import type { Session } from '../../services/chat/types.js'
 import { closeSearchPanel } from '../search/searchPanelState.js'
+import { useHistorySearch } from '../historySearch/historySearchState.js'
 import { AssistantMessage } from './AssistantMessage.js'
 import { ScrollToBottomContext } from './scrollContext.js'
 import { UserMessage } from './UserMessage.js'
@@ -49,6 +50,8 @@ export const MessageList = ({
   const scrollTopRef = useRef(0)
   const restoreScrollRef = useRef<{ messageId: string; top: number } | null>(null)
   const messages = getVisibleMessages(session)
+  const searchTarget = useHistorySearch((state) => state.target)
+  const clearSearchTarget = useHistorySearch((state) => state.clearTarget)
   const [previousVersions, setPreviousVersions] = useState(() =>
     buildMessageVersions(session, new Map())
   )
@@ -100,6 +103,34 @@ export const MessageList = ({
   }, [session.id, lastMessageId, scrollToBottom])
 
   useEffect(closeSearchPanel, [session.id, lastMessageId])
+
+  // 搜索命中后等目标会话挂载，再滚到消息中部并短暂标出位置。
+  useEffect(() => {
+    if (!searchTarget || searchTarget.sessionId !== session.id) {
+      return
+    }
+    clearSearchTarget()
+    if (!searchTarget.messageId) {
+      return
+    }
+    stickyRef.current = false
+    requestAnimationFrame(() => {
+      const element =
+        scrollRef.current?.querySelector<HTMLElement>(
+          `[data-message-id="${CSS.escape(searchTarget.messageId ?? '')}"]`
+        ) ?? null
+      if (!element) {
+        return
+      }
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      element.scrollIntoView({
+        block: 'center',
+        behavior: reduceMotion ? 'auto' : 'smooth',
+      })
+      element.classList.add(styles.searchTarget)
+      window.setTimeout(() => element.classList.remove(styles.searchTarget), 1800)
+    })
+  }, [clearSearchTarget, searchTarget, session.id])
 
   const selectVersion = useCallback(
     (messageId: string, anchorTop: number) => {

@@ -24,6 +24,8 @@ import { stopReadAloud } from '../services/speech/readAloud.js'
 import { CollapsedSider } from '../components/sider/CollapsedSider.js'
 import { closeMobileSider } from '../components/sider/mobileSiderState.js'
 import { MobileSider, Sider } from '../components/sider/Sider.js'
+import { HistorySearchDialog } from '../components/historySearch/HistorySearchDialog.js'
+import { useHistorySearch } from '../components/historySearch/historySearchState.js'
 import styles from './App.module.css'
 
 export const App = () => {
@@ -56,6 +58,26 @@ export const App = () => {
     document.documentElement.lang = locale
   }, [locale])
 
+  // 与官方一致的聊天记录搜索快捷键；输入法组合期间不拦截按键。
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (
+        event.isComposing ||
+        event.altKey ||
+        (!event.metaKey && !event.ctrlKey) ||
+        event.key.toLowerCase() !== 'k' ||
+        useChatStore.getState().importingHistory
+      ) {
+        return
+      }
+      event.preventDefault()
+      event.stopPropagation()
+      useHistorySearch.getState().toggleSearch()
+    }
+    document.addEventListener('keydown', onKeyDown, { capture: true })
+    return () => document.removeEventListener('keydown', onKeyDown, { capture: true })
+  }, [])
+
   // 文件数、存储空间达到上限时，附件上只显示「上传失败」，原因用 toast 说明
   useEffect(() => onUploadNotice(showToast), [])
   useEffect(bindChatPersistence, [])
@@ -76,7 +98,7 @@ export const App = () => {
   return (
     <>
       <div ref={frameRef} className={styles.frame}>
-        {isMobile ? <MobileSider /> : siderCollapsed ? null : <Sider />}
+        {isMobile ? <MobileSider /> : <Sider collapsed={siderCollapsed} />}
         <main className={styles.main}>
           {saveError ? (
             <div className={styles.saveError} role="alert">
@@ -92,7 +114,7 @@ export const App = () => {
             </div>
           ) : null}
           <div className={styles.content}>
-            {siderCollapsed ? <CollapsedSider /> : null}
+            <CollapsedSider visible={siderCollapsed} />
             {!ready || (activeId !== null && !session) ? (
               <div className={styles.loadingView}>
                 {isMobile ? <MobileHeader /> : null}
@@ -133,6 +155,7 @@ export const App = () => {
         <SearchPanel />
       </div>
       <SettingsDialog />
+      <HistorySearchDialog />
       <Toast />
     </>
   )

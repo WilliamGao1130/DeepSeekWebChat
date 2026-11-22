@@ -1,3 +1,20 @@
+.siderSlot {
+  width: 261px;
+  max-width: 261px;
+  height: 100%;
+  flex-shrink: 0;
+  overflow: hidden;
+  transition:
+    width var(--ds-transition-duration-slow) var(--ds-ease-in-out),
+    max-width var(--ds-transition-duration-slow) var(--ds-ease-in-out);
+  will-change: width, max-width;
+}
+
+.siderSlotCollapsed {
+  width: 0;
+  max-width: 0;
+}
+
 .sider {
   display: flex;
   flex-direction: column;
@@ -8,6 +25,16 @@
   padding: 6px 12px 0;
   border-right: 1px solid var(--dsw-alias-border-l1);
   background-color: var(--dsw-specific-sidebar-fill);
+  transition:
+    transform var(--ds-transition-duration-slow) var(--ds-ease-in-out),
+    opacity var(--ds-transition-duration-slow) var(--ds-ease-in-out);
+  will-change: transform, opacity;
+}
+
+.contentCollapsed {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-100%);
 }
 
 .top {
@@ -20,6 +47,14 @@
   margin-bottom: 16px;
   padding: 15px 0 10px 4px;
   flex-shrink: 0;
+}
+
+.topActions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 0;
+  transform: translateX(9px);
 }
 
 .newChat {
@@ -165,6 +200,22 @@
   align-items: center;
   gap: 16px;
   margin: 12px 0 0 16px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-8px);
+  visibility: hidden;
+  transition:
+    opacity var(--ds-transition-duration) var(--ds-ease-in-out),
+    transform var(--ds-transition-duration) var(--ds-ease-in-out),
+    visibility 0s linear var(--ds-transition-duration);
+}
+
+.collapsedVisible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+  visibility: visible;
+  transition-delay: 80ms, 80ms, 0s;
 }
 
 .collapsedGroup {
