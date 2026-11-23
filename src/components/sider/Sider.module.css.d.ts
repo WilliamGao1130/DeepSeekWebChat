@@ -19,7 +19,6 @@ declare const styles: {
   readonly collapsedVisible: string
   readonly collapsedGroup: string
   readonly drawer: string
-  readonly drawerMask: string
   readonly mobile: string
 }
 export = styles

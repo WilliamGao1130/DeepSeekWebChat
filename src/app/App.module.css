@@ -14,6 +14,28 @@
   min-width: 0;
 }
 
+.mobileTrack {
+  --mobile-sider-width: min(300px, calc(100vw - 48px));
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  width: calc(100vw + var(--mobile-sider-width));
+  transform: translateX(calc(-1 * var(--mobile-sider-width)));
+  transition: transform var(--ds-transition-duration-slow) var(--ds-ease-in-out);
+  will-change: transform;
+}
+
+.mobileTrackOpen {
+  transform: translateX(0);
+}
+
+.mobileMain {
+  flex: 0 0 100vw;
+  width: 100vw;
+}
+
 .content {
   position: relative;
   flex: 1;
@@ -58,5 +80,11 @@
     top: var(--app-viewport-top, 0px);
     bottom: auto;
     height: var(--app-viewport-height, 100dvh);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobileTrack {
+    transition: none;
   }
 }

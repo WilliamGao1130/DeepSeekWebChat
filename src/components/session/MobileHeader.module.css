@@ -7,6 +7,22 @@
   padding: 12px 10px 4px;
 }
 
+.menuButton {
+  opacity: 1;
+  transition: opacity 150ms var(--ds-ease-in-out);
+}
+
+.menuButtonHidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menuButton {
+    transition: none;
+  }
+}
+
 .title {
   flex: 1;
   min-width: 0;

@@ -1,3 +1,4 @@
+import clsx from 'clsx'
 import { useEffect } from 'react'
 import { useTranslate } from '../i18n/index.js'
 import { useSettings } from '../services/settings.js'
@@ -22,7 +23,7 @@ import { onUploadNotice } from '../services/attachments.js'
 import { Button } from '../components/base/Button.js'
 import { stopReadAloud } from '../services/speech/readAloud.js'
 import { CollapsedSider } from '../components/sider/CollapsedSider.js'
-import { closeMobileSider } from '../components/sider/mobileSiderState.js'
+import { closeMobileSider, useMobileSider } from '../components/sider/mobileSiderState.js'
 import { MobileSider, Sider } from '../components/sider/Sider.js'
 import { HistorySearchDialog } from '../components/historySearch/HistorySearchDialog.js'
 import { useHistorySearch } from '../components/historySearch/historySearchState.js'
@@ -31,6 +32,7 @@ import styles from './App.module.css'
 export const App = () => {
   const t = useTranslate()
   const isMobile = useIsMobile()
+  const mobileSiderOpen = useMobileSider((state) => state.open)
   const locale = useSettings((state) => state.locale)
   // 移动端侧边栏以独立抽屉管理开合状态
   const siderCollapsed = useSettings((state) => state.siderCollapsed) && !isMobile
@@ -95,63 +97,72 @@ export const App = () => {
     ensureApiKey()
   }, [])
 
+  const main = (
+    <main className={clsx(styles.main, isMobile && styles.mobileMain)}>
+      {saveError ? (
+        <div className={styles.saveError} role="alert">
+          <span>{t('sessionSaveFailed')}</span>
+          <Button
+            variant="outlined"
+            size="s"
+            disabled={importingHistory}
+            onClick={retrySaveSessions}
+          >
+            {t('retry')}
+          </Button>
+        </div>
+      ) : null}
+      <div className={styles.content}>
+        <CollapsedSider visible={siderCollapsed} />
+        {!ready || (activeId !== null && !session) ? (
+          <div className={styles.loadingView}>
+            {isMobile ? <MobileHeader /> : null}
+            <div className={styles.loadingState} role="status" aria-live="polite">
+              <span>
+                {(!ready ? initError : sessionLoadError)
+                  ? t(!ready ? 'sessionListLoadFailed' : 'sessionLoadFailed')
+                  : t('sessionLoading')}
+              </span>
+              {(!ready ? initError : sessionLoadError) ? (
+                <Button
+                  variant="outlined"
+                  size="m"
+                  onClick={() => {
+                    if (!ready) {
+                      void initChat()
+                    } else if (activeId !== null) {
+                      selectSession(activeId)
+                    }
+                  }}
+                >
+                  {t('retry')}
+                </Button>
+              ) : null}
+            </div>
+          </div>
+        ) : session ? (
+          <SessionView session={session} streaming={streaming} siderCollapsed={siderCollapsed} />
+        ) : (
+          <Welcome />
+        )}
+      </div>
+    </main>
+  )
+
   return (
     <>
       <div ref={frameRef} className={styles.frame}>
-        {isMobile ? <MobileSider /> : <Sider collapsed={siderCollapsed} />}
-        <main className={styles.main}>
-          {saveError ? (
-            <div className={styles.saveError} role="alert">
-              <span>{t('sessionSaveFailed')}</span>
-              <Button
-                variant="outlined"
-                size="s"
-                disabled={importingHistory}
-                onClick={retrySaveSessions}
-              >
-                {t('retry')}
-              </Button>
-            </div>
-          ) : null}
-          <div className={styles.content}>
-            <CollapsedSider visible={siderCollapsed} />
-            {!ready || (activeId !== null && !session) ? (
-              <div className={styles.loadingView}>
-                {isMobile ? <MobileHeader /> : null}
-                <div className={styles.loadingState} role="status" aria-live="polite">
-                  <span>
-                    {(!ready ? initError : sessionLoadError)
-                      ? t(!ready ? 'sessionListLoadFailed' : 'sessionLoadFailed')
-                      : t('sessionLoading')}
-                  </span>
-                  {(!ready ? initError : sessionLoadError) ? (
-                    <Button
-                      variant="outlined"
-                      size="m"
-                      onClick={() => {
-                        if (!ready) {
-                          void initChat()
-                        } else if (activeId !== null) {
-                          selectSession(activeId)
-                        }
-                      }}
-                    >
-                      {t('retry')}
-                    </Button>
-                  ) : null}
-                </div>
-              </div>
-            ) : session ? (
-              <SessionView
-                session={session}
-                streaming={streaming}
-                siderCollapsed={siderCollapsed}
-              />
-            ) : (
-              <Welcome />
-            )}
+        {isMobile ? (
+          <div className={clsx(styles.mobileTrack, mobileSiderOpen && styles.mobileTrackOpen)}>
+            <MobileSider />
+            {main}
           </div>
-        </main>
+        ) : (
+          <>
+            <Sider collapsed={siderCollapsed} />
+            {main}
+          </>
+        )}
         <SearchPanel />
       </div>
       <SettingsDialog />

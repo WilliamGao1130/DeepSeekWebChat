@@ -232,22 +232,17 @@
 }
 
 .drawer {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
+  position: relative;
   z-index: 800;
-}
-
-.drawerMask {
-  position: absolute;
-  inset: 0;
-  z-index: 799;
+  width: var(--mobile-sider-width);
+  height: 100%;
+  flex-shrink: 0;
+  box-shadow: 8px 0 24px rgba(0, 0, 0, 0.08);
 }
 
 .mobile {
-  width: 300px;
-  max-width: calc(100vw - 48px);
+  width: 100%;
+  max-width: none;
 
   .listWrap {
     margin-top: 16px;

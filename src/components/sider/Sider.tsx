@@ -194,18 +194,18 @@ export const Sider = ({
   )
 }
 
-/** 移动端抽屉：浮在页面上方，点空白区域关闭。 */
+/** 移动端侧栏：与对话区处于同一横向轨道，由外层统一播放位移。 */
 export const MobileSider = () => {
   const open = useMobileSider((state) => state.open)
-  if (!open) {
-    return null
-  }
+  const drawerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    drawerRef.current?.toggleAttribute('inert', !open)
+  }, [open])
+
   return (
-    <>
-      <div className={styles.drawerMask} onClick={closeMobileSider} />
-      <div className={styles.drawer}>
-        <Sider mobile />
-      </div>
-    </>
+    <div ref={drawerRef} className={styles.drawer} aria-hidden={!open}>
+      <Sider mobile />
+    </div>
   )
 }
